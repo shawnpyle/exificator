@@ -1,0 +1,21 @@
+== Instructions
+
+Run this script from the command line in the folder with the images you want to 
+add exif data to. It will try to find all images in this and all subdirectories.
+
+> /some/path/to/exificator.rb
+
+Or, call with paths to files.
+
+> /some/path/to/exificator.rb file1.jpg file2.jpeg file3.tif
+
+Or, call with glob paths to files
+
+> /some/path/to/exificator.rb /my/path/to/images/*.jp*
+
+== Dependencies
+
+This script requires the excellent exiftool 8.73 by Phil Harvey
+http://www.sno.phy.queensu.ca/~phil/exiftool/
+
+Oh, and I've only used it on a Mac with ruby.
