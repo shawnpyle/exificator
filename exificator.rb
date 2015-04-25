@@ -10,7 +10,7 @@
 require 'fileutils'
 
 EXIFTOOL_URL = 'http://www.sno.phy.queensu.ca/~phil/exiftool/'
-EXIFTOOL = '/usr/bin/exiftool'
+EXIFTOOL = '/usr/local/bin/exiftool' #installed via `brew install exiftool`
 #PREVIEW_TOOL = '/usr/bin/qlmanage -p'
 PREVIEW_TOOL = 'open -a Preview'
 CURRENT_DIR = Dir.pwd
