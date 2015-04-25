@@ -48,7 +48,7 @@ end
 def all_images(path)
   extensions = '{'+EXTENSIONS.join(',')+'}'
   paths = File.join(path,'**',"*.#{extensions}")
-  Dir.glob(paths)
+  Dir.glob(paths,File::FNM_CASEFOLD)
 end
 
 def get_meta(path,fields=[],only_value=true)
@@ -87,10 +87,10 @@ def set_descriptions(path)
 end
 
 def rename_using_description(path)
-  description = get_meta(path,['Description']).gsub(PUNCTUATION_REGEX,'').gsub(' ','_')
+  description = get_meta(path,['Description']).gsub(PUNCTUATION_REGEX,'').gsub(' ','_').gsub(/\_+/,'_')
   return if description.empty?
   
-  ext = File.extname(path)
+  ext = File.extname(path).downcase
   new_file = File.join(File.dirname(path),"#{description}#{ext}")
   while File.exists?(new_file)
     new_file = new_file.gsub(/(\.(\d+))?#{ext}/) { ".#{$2.to_i+1}#{ext}"}
