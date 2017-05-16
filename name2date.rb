@@ -1,15 +1,13 @@
 #!/usr/bin/env ruby
 
-# This script changes the files found with the the FILE_REGEXP to the modification date. 
+# This script changes the files found with the find to the modification date. 
 
 require 'date'
 require 'fileutils'
 
 DIRECTORY=File.expand_path(ARGV[0])
-FILE_REGEXP=/IMG_\d+/ #images from iPhone Camera Roll
-
-files = `find "#{DIRECTORY}"`.split("\n")
-files.select!{|f| File.basename(f) =~ FILE_REGEXP }
+files = `find "#{DIRECTORY}" -maxdepth 1 -type f -name "IMG_*"`.split("\n")
+#files.select!{|f| File.basename(f) =~ FILE_REGEXP }
 
 if files.empty?
 	puts "No files were found in #{DIRECTORY}."
@@ -21,6 +19,10 @@ for file in files
 	modified_at = File.mtime(file)
 	ext = File.extname(file)
 	new_file = File.join(DIRECTORY,"#{modified_at.strftime("%Y%m%d%H%M%S")}#{ext}")
+	i = 0
+	while(File.exist?(new_file)) do
+		new_file = File.join(DIRECTORY,"#{modified_at.strftime("%Y%m%d%H%M%S")}.#{i+=1}#{ext}")
+	end
 	puts "Moving #{file} => #{new_file}"
 	FileUtils.mv(file, new_file)
 	#break
