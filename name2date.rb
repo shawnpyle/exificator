@@ -5,8 +5,9 @@
 require 'date'
 require 'fileutils'
 
+REGEXP=".*\/(IMG|VID)_.*"
 DIRECTORY=File.expand_path(ARGV[0])
-files = `find "#{DIRECTORY}" -maxdepth 1 -type f -name "IMG_*"`.split("\n")
+files = `find -E "#{DIRECTORY}" -maxdepth 1 -type f -regex "#{REGEXP}"`.split("\n")
 #files.select!{|f| File.basename(f) =~ FILE_REGEXP }
 
 if files.empty?
