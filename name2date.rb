@@ -5,11 +5,17 @@
 require 'date'
 require 'fileutils'
 
-REGEXP=".*\/(IMG|VID)_.*"
-DIRECTORY=File.expand_path(ARGV[0])
-files = `find -E "#{DIRECTORY}" -maxdepth 1 -type f -regex "#{REGEXP}"`.split("\n")
-#files.select!{|f| File.basename(f) =~ FILE_REGEXP }
+if %w(-h --h -help --help help).include?(ARGV[0])
+	puts "#{$0} [-h | START_DIR] [REGEXP]"
+	exit 0
+end
 
+DIRECTORY=File.expand_path(ARGV[0])
+REGEXP= ARGV[1] ? ARGV[1] : ".*\/(IMG|VID)_.*" #iPhone naming format
+#REGEXP=".*\.(jpg|mp4)"
+puts "Looking for files matching #{REGEXP} in #{DIRECTORY}"
+
+files = `find -E "#{DIRECTORY}" -maxdepth 1 -type f -regex "#{REGEXP}"`.split("\n")
 if files.empty?
 	puts "No files were found in #{DIRECTORY}."
 	exit 1
