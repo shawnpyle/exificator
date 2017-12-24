@@ -46,11 +46,13 @@ organizing photos by date.
 
 Examples:
 	#{$0} -r "(IMG|VID)_.*" # iPhone naming format
+	#{$0} -r ".*(gif|jpg|jpeg|png|tif|tiff)" # any image
+	#{$0} -r ".*(mov|mp4)" # any movie
 
 Options:
 END
 
-			opts.on("-r", "--regex=REGEXP", "REGEX of name, sent to `find` command, default is #{DEFAULTS[:regexp]}") do |regexp|
+			opts.on("-r", "--regex=REGEXP", "Regular expression of name, sent to `find` command, default is #{DEFAULTS[:regexp]}") do |regexp|
 				@options[:regexp] = ".*/#{regexp}"
 			end
 
@@ -64,6 +66,10 @@ END
 
 			opts.on('-v', '--verbose', "Enbable verbose output") do |verbose|
 				@options[:verbose] = verbose
+			end
+
+			opts.on('--dry', "Dry run by searching for but do not rename files. This could produce incorrect renamed files if there are duplicate files. This is only really helpful for getting your regexp and depth parameters right.") do |dry|
+				@options[:dry] = dry
 			end
 		end.parse!
 
@@ -92,7 +98,7 @@ END
 			new_file = new_name(file, i+=1)
 		end while(File.exist?(new_file))
 		puts "Moving #{file} => #{new_file}" if options[:verbose]
-		FileUtils.mv(file, new_file)
+		FileUtils.mv(file, new_file) unless options[:dry]
 	end
 end
 
