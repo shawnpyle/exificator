@@ -8,7 +8,7 @@ require 'optparse'
 require 'pp'
 
 class Name2Date
-	DEFAULTS = {start: Dir.pwd, depth: 1, regexp: '(IMG|VID)_.*'}
+	DEFAULTS = {start: Dir.pwd, depth: 1, regexp: '.*/(IMG|VID)_.*'}
 
 	def initialize
 		@options = []
