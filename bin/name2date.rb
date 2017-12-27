@@ -1,17 +1,37 @@
 #!/usr/bin/env ruby
 
-# This script changes the files found with the find to the modification date.
-
 require 'date'
 require 'fileutils'
-require 'optparse'
 require 'pp'
+require_relative '../lib/options'
 
 class Name2Date
-	DEFAULTS = {start: Dir.pwd, depth: 1, regexp: '.*/(IMG|VID)_.*'}
+	attr_reader :options
 
 	def initialize
 		@options = []
+
+		banner = <<END
+Usage: #{$0} [options]
+
+This will search for files in the start directory and rename them based on the creation date. This is useful for
+organizing photos by date.
+
+Examples:
+#{$0} -r "(IMG|VID)_.*" # iPhone naming format
+#{$0} -r ".*(gif|jpg|jpeg|png|tif|tiff)" # any image
+#{$0} -r ".*(mov|mp4)" # any movie
+
+Options:
+END
+		@options = Options.new(banner)
+			.regex('.*/(IMG|VID)_.*')
+			.start(Dir.pwd)
+			.depth(1)
+			.verbose
+			.dry
+			.help
+			.options
 	end
 
 	def run
@@ -31,50 +51,6 @@ class Name2Date
 	end
 
 	private
-
-	def options
-		return @options unless @options.empty?
-
-		@options = DEFAULTS
-
-		OptionParser.new do |opts|
-			opts.banner = <<END
-Usage: #{$0} [options]
-
-This will search for files in the start directory and rename them based on the creation date. This is useful for
-organizing photos by date.
-
-Examples:
-	#{$0} -r "(IMG|VID)_.*" # iPhone naming format
-	#{$0} -r ".*(gif|jpg|jpeg|png|tif|tiff)" # any image
-	#{$0} -r ".*(mov|mp4)" # any movie
-
-Options:
-END
-
-			opts.on("-r", "--regex=REGEXP", "Regular expression of name, sent to `find` command, default is #{DEFAULTS[:regexp]}") do |regexp|
-				@options[:regexp] = ".*/#{regexp}"
-			end
-
-			opts.on("-s", "--start=START-DIR", "Directory to start searching in, default is #{DEFAULTS[:start]}") do |start|
-				@options[:start] = start.gsub(/\/$/,'')
-			end
-
-			opts.on("-d", "--depth=DEPTH", "Depth of subdirectories to search in, default is #{DEFAULTS[:depth]}") do |depth|
-				@options[:depth] = depth.to_i
-			end
-
-			opts.on('-v', '--verbose', "Enbable verbose output") do |verbose|
-				@options[:verbose] = verbose
-			end
-
-			opts.on('--dry', "Dry run by searching for but do not rename files. This could produce incorrect renamed files if there are duplicate files. This is only really helpful for getting your regexp and depth parameters right.") do |dry|
-				@options[:dry] = dry
-			end
-		end.parse!
-
-		@options
-	end
 
 	def files
 		opts = options

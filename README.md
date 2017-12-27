@@ -8,7 +8,7 @@ git clone git@github.com:shawnpyle/exificator.git
 ```
 
 Add the `bin` directory to your path for access shell wide:
-`echo 'PATH=$PATH:path/to/exificator/'`
+`echo 'PATH=$PATH:path/to/exificator/bin'`
 
 # Caveats
 
