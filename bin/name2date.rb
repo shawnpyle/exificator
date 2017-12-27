@@ -4,13 +4,12 @@ require 'date'
 require 'fileutils'
 require 'pp'
 require_relative '../lib/options'
+require_relative '../lib/finder'
 
 class Name2Date
 	attr_reader :options
 
 	def initialize
-		@options = []
-
 		banner = <<END
 Usage: #{$0} [options]
 
@@ -25,7 +24,7 @@ Examples:
 Options:
 END
 		@options = Options.new(banner)
-			.regex('.*/(IMG|VID)_.*')
+			.regexp('.*/(IMG|VID)_.*')
 			.start(Dir.pwd)
 			.depth(1)
 			.verbose
@@ -35,7 +34,7 @@ END
 	end
 
 	def run
-		f = files
+		f = Finder.new(options).files
 
 		if f.size == 0
 			puts "No files found"
@@ -51,13 +50,6 @@ END
 	end
 
 	private
-
-	def files
-		opts = options
-		find_command = %Q(find -E "#{opts[:start]}" -maxdepth #{opts[:depth]} -type f -iregex "#{opts[:regexp]}" )
-		puts "Finding files with: #{find_command}" if options[:verbose]
-		files = `#{find_command}`.split("\n")
-	end
 
 	def new_name(file, version=nil)
 		modified_at = File.mtime(file)
