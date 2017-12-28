@@ -17,8 +17,8 @@ class Options
 		@options
 	end
 
-	def regex(default = nil)
-		add_option(:regexp, default, '-r', '--regex=REGEXP', 'Regular expression of name, sent to `find` command')
+	def regexp(default = nil)
+		add_option(:regexp, default, '-r', '--regexp=REGEXP', 'Regular expression of name, sent to `find` command')
 	end
 
 	def start(default = nil)
