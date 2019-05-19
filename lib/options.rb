@@ -53,7 +53,7 @@ class Options
 	end
 
 	def check_for_help
-		return unless @options[:help]
+		return unless @options[:help] || ARGV.empty?
 		puts @parser
 		exit
 	end

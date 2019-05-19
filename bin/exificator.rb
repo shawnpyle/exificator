@@ -12,9 +12,7 @@ class Exificator
 	attr_reader :options
 
 	def initialize
-		banner = <<END
-		This script renames the files and updates the EXIF comment and description tags within the image to match.
-END
+		banner = "This script renames the files and updates the EXIF comment and description tags within the image to match."
 		@options = Options.new(banner)
 			.regexp('.*/.*(jpe?g|png|tiff?)')
 			.start(Dir.pwd)
@@ -46,7 +44,7 @@ END
 		images = Finder.new(options).files
 		if images.size == 0
 			puts "No images found."
-			exi
+			exit
 		end
 
 		puts "Found #{images.size} images. "
