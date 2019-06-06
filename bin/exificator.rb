@@ -12,7 +12,7 @@ class Exificator
 	attr_reader :options
 
 	def initialize
-		banner = "This script renames the files and updates the EXIF comment and description tags within the image to match."
+		banner = "\nThis script renames files and updates the EXIF comment and description tags within the image to match.\n\nUSAGE: #{$0} [options] [path]\n\nOPTIONS:"
 		@options = Options.new(banner)
 			.regexp('.*/.*(jpe?g|png|tiff?)')
 			.start(Dir.pwd)
@@ -58,11 +58,10 @@ class Exificator
 
 		1.upto(images.size) do |i|
 			image = images[i-1]
-
 			if @options[:verbose]
 				puts "\n===== "+i.to_s+" of "+images.size.to_s+" ====="
-				puts image
 			end
+			puts "Processing #{image}"
 
 			exiftool = ExifTool.new(image)
 			descriptions = exiftool.descriptions
