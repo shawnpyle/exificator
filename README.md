@@ -1,15 +1,21 @@
 # Introduction
+
 This project contains some useful scripts for photo organization and metadata updating.
 
 # Installation
+
+Use the `script/install.sh` to install dependencies
+
+# Usage
+
+After installation, you should be able to use exificator by calling it directly
+
 ```
-brew install exiftool
-git clone git@github.com:shawnpyle/exificator.git
+bin/exificator -h
 ```
 
-Add the `bin` directory to your path for access shell wide:
-`echo 'PATH=$PATH:path/to/exificator/bin'`
+or by adding the command to your path for access shell wide
 
-# Caveats
-
-I've created these for my own purposes on Mac OSX 10.9+, so your mileage may vary.
+```
+echo 'PATH=$PATH:~/projects/exificator/bin/exificator' >> ~/.bash_profile
+```

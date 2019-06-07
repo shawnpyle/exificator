@@ -34,12 +34,9 @@ class ExifTool
 		get(META_DESCRIPTIONS,false)
 	end
 
-	def descriptions=(description)
-		pp description
-		set(META_DESCRIPTIONS,description) if description.strip != ''
+	def all
+		get(['All'],false)
 	end
-
-	private
 
 	def get(fields=[],only_value=true)
 		args = []
@@ -49,6 +46,13 @@ class ExifTool
 		end
 		`#{BINARY} #{args.join(' ')} "#{path}"`.chomp
 	end
+
+	def descriptions=(description)
+		pp description
+		set(META_DESCRIPTIONS,description) if description.strip != ''
+	end
+
+	private
 
 	def set(fields,value)
 		args = ['-overwrite_original']
