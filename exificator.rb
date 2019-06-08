@@ -19,11 +19,11 @@ class Exificator < Thor
 
 	class_option :verbose, aliases: '-v', type: :boolean, desc: "Verbose output", default: true
 
-	class_option :dry_run, type: :boolean, desc: "Does not modify images"
+	# class_option :dry_run, type: :boolean, desc: "Does not modify images"
 
 	desc 'preview', 'Open the found images in Preview.app'
 	def preview
-		`open -a Preview '#{images.flatten.join("' '")}'`
+		open(images.flatten.join("' '"))
 	end
 
 	desc 'list', 'Output a list of images found'
@@ -36,48 +36,46 @@ class Exificator < Thor
 	def details
 		images.each do |image|
 			puts "\nDetails for \"#{image}\"" if verbose?
-			et = ExifTool.new(image)
-			if options[:tag].strip.empty?
-				descriptions = ExifTool.new(image).descriptions
-				puts descriptions.empty? ? 'No descriptions were found' : descriptions
-			else
-				puts et.get(options[:tag], false)
-			end
+			detail(image)
 		end
 	end
 
-	# def rename
-	# 	1.upto(images.size) do |i|
-	# 		image = images[i-1]
-	# 		puts "\n===== #{i.to_s} of #{images.size.to_s} =====" if verbose?
-	# 		puts "Processing #{image}"
-	# 		exiftool = ExifTool.new(image)
-	# 		descriptions = exiftool.descriptions
-	# 		unless descriptions == ''
-	# 			puts "Current descriptions: "
-	# 			puts descriptions
-	# 		end
-	#
-	# 		new_description = Prompt.prompt("Enter new description:")
-	# 		exiftool.descriptions = new_description
-	#
-	# 		rename_using_description(image, new_description)
-	# 	end
-	# end
+	option :show, type: :boolean, desc: 'Show the file'
+	desc 'process', 'Add EXIF descriptions and rename file to match'
+	def process
+		images.each.with_index do |image,i|
+			puts "#{i+1}/#{images.size}: Processing #{image}"
+			exiftool = ExifTool.new(image)
+			descriptions = exiftool.descriptions
+			unless descriptions == ''
+				puts "Current descriptions: "
+				puts descriptions
+			end
+			open(image) if show
+			new_description = Prompt.prompt("Enter new description:")
+			exiftool.descriptions = new_description
+
+			rename(image, new_description)
+		end
+	end
 
 	private
 
-	# def using_description(path, description)
-	# 	name = description.strip.gsub(PUNCTUATION_REGEX,'').gsub(/\s+/,'_').gsub(/\_+/,'_')
-	# 	return if name.empty?
-	#
-	# 	ext = File.extname(path).downcase
-	# 	new_file = File.join(File.dirname(path),"#{name}#{ext}")
-	# 	while File.exists?(new_file)
-	# 		new_file = new_file.gsub(/(\.(\d+))?#{ext}/) { ".#{$2.to_i+1}#{ext}"}
-	# 	end
-	# 	FileUtils.move(path,new_file)
-	# end
+	def description_to_name(description)
+		description.strip.gsub(PUNCTUATION_REGEX,'').gsub(/\s+/,'_').gsub(/\_+/,'_')
+	end
+
+	def rename(path, description)
+		name = description_to_name(description)
+		return if name.empty?
+
+		ext = File.extname(path).downcase
+		new_file = File.join(File.dirname(path),"#{name}#{ext}")
+		while File.exists?(new_file)
+			new_file = new_file.gsub(/(\.(\d+))?#{ext}/) { ".#{$2.to_i+1}#{ext}"}
+		end
+		FileUtils.move(path,new_file)
+	end
 
 	def start_dir
 		@start_dir ||= File.expand_path(options[:start])
@@ -95,22 +93,53 @@ class Exificator < Thor
 		@tag ||= options[:tag]
 	end
 
+	def show
+		@show || options[:show]
+	end
+
 	def verbose?
 		options.key?(:verbose)
 	end
 
 	# Returns array of image paths
 	def images
-		return [path] if path && File.file?(path)
+		return @images if @images
 
+		if path && File.file?(path)
+			@images = [path]
+			return @images
+		end
+
+		@images = find
+		puts "Found #{@images.size} images" if verbose?
+		@images
+	end
+
+	def find
 		command = %Q(find -E "#{start_dir}" -type f -iregex "#{regex}")
 		command += " -maxdepth #{options[:depth]}" if options.key?(:depth)
 
 		puts "Finding files with: #{command}" if verbose?
-		found = `#{command}`.split("\n")
-		puts "Founnd #{found.size} images" if verbose?
-		found
+		`#{command}`.split("\n")
+	end
+
+	def detail(image)
+		et = ExifTool.new(image)
+		if options[:tag].strip.empty?
+			descriptions = ExifTool.new(image).descriptions
+			puts descriptions.empty? ? 'No descriptions were found' : descriptions
+		else
+			puts et.get(options[:tag], false)
+		end
+	end
+
+	def open(image_list)
+		`open -a Preview '#{image_list}'`
 	end
 end
 
-Exificator.start(ARGV)
+begin
+	Exificator.start(ARGV)
+rescue SystemExit, Interrupt
+	puts "\nGoodbye!"
+end
