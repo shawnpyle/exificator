@@ -60,6 +60,30 @@ class Exificator < Thor
 		end
 	end
 
+	option :format, desc: 'Extension of the format to convert to (e.g. jpg | tiff | png | gif). See sips command for more details', required: true
+	desc 'convert', 'Convert images to a specific format'
+	def convert
+		if images.size == 0
+			puts "No images found."
+			return
+		end
+
+		unless Prompt.confirm?("Are you sure you want to convert #{images.size} images to #{options[:format]}? (y/n)")
+			puts "Aborting convert!"
+			return
+		end
+
+		images.each.with_index do |image,i|
+
+			outfile = File.join(
+				File.dirname(image),
+				File.basename(image, '.*')+".#{format}"
+			)
+			puts "#{i+1}/#{images.size}: Converting #{image}"
+			`sips -s format #{format} "#{image}" -s formatOptions 100 --out "#{outfile}"`
+		end
+	end
+
 	private
 
 	def description_to_name(description)
@@ -99,7 +123,11 @@ class Exificator < Thor
 	end
 
 	def show
-		@show || options[:show]
+		@show ||= options[:show]
+	end
+
+	def format
+		@format ||= options[:format]
 	end
 
 	def verbose?
