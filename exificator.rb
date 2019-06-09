@@ -53,6 +53,7 @@ class Exificator < Thor
 			end
 			open(image) if show
 			new_description = Prompt.prompt("Enter new description:")
+			next if new_description.empty?
 			exiftool.descriptions = new_description
 
 			rename(image, new_description)
