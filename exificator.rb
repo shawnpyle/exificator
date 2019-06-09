@@ -11,7 +11,7 @@ class Exificator < Thor
 
 	class_option :start, aliases: '-s', default: './', desc: "Starting directory to look for images."
 
-	class_option :regex, aliases: '-r', default: '.*(jpe?g|png|tiff?)', desc: "The regular expression to match file names."
+	class_option :regex, aliases: '-r', default: '.*(jpe?g|png|tiff?)', desc: "The regular expression to match file names. Ensures .* starts the regex so it matches the path part of the file path."
 
 	class_option :path, aliases: '-p', desc: "Path to a specific file. This will take presedence over start and regex options."
 
@@ -82,7 +82,11 @@ class Exificator < Thor
 	end
 
 	def regex
-		@regex ||= options[:regex]
+		@regex ||= lambda do
+			rx = options[:regex]
+			rx = ".*#{rx}" unless rx.start_with?('.*')
+			return rx
+		end.call
 	end
 
 	def path
