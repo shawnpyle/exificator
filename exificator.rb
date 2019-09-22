@@ -56,7 +56,7 @@ class Exificator < Thor
 			next if new_description.empty?
 			exiftool.descriptions = new_description
 
-			rename(image, new_description)
+			renameWithDescription(image, new_description)
 		end
 	end
 
@@ -84,13 +84,39 @@ class Exificator < Thor
 		end
 	end
 
+	option :prefix, type: :string, desc: 'Prefix to use. Defaults to last modified date in YYYYMMDDHHMMSS_ format.'
+	desc 'rename', 'Renames in format <prefix>_<description>.<ext> if there is a description.'
+	def rename
+		if images.size == 0
+			puts "No images found."
+			return
+		end
+
+		unless Prompt.confirm?("Are you sure you want to rename #{images.size} images in the format of #{options[:prefix]||'YYYYMMDDHHMMSS'}_<description>? (y/n)")
+			puts "Aborting rename!"
+			return
+		end
+
+		images.each.with_index do |image,i|
+			prefix = options[:prefix] || modified_at(image).strftime('%Y%m%d%H%M%S');
+			ext = File.extname(image)
+			dir = File.dirname(image)
+			description = ExifTool.new(image).get('Description')
+			descName = (description.empty? ? '' : '_'+description_to_name(description))
+			newPath = File.join(dir,"#{prefix}#{descName}#{ext}")
+
+			puts "#{i+1}/#{images.size}: Renaming #{image} to #{newPath}"
+			FileUtils.move(image, newPath)
+		end
+	end
+
 	private
 
 	def description_to_name(description)
 		description.strip.gsub(PUNCTUATION_REGEX,'').gsub(/\s+/,'_').gsub(/\_+/,'_')
 	end
 
-	def rename(path, description)
+	def renameWithDescription(path, description)
 		name = description_to_name(description)
 		return if name.empty?
 
@@ -138,8 +164,8 @@ class Exificator < Thor
 	def images
 		return @images if @images
 
-		if path && File.file?(path)
-			@images = [path]
+		if path
+			@images = (File.file?(path) ? [path] : [])
 			return @images
 		end
 
@@ -168,6 +194,10 @@ class Exificator < Thor
 
 	def open(image_list)
 		`open -a Preview '#{image_list}'`
+	end
+
+	def modified_at(path)
+		return File.mtime(path)
 	end
 end
 
